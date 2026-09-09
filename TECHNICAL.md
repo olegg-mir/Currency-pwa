@@ -12,7 +12,7 @@ Currenzy — mobile-first PWA для справочного пересчёта �
 - `big.js` для десятичной арифметики без ошибок двоичной плавающей точки.
 - dnd-kit для touch- и keyboard-доступной сортировки валют.
 - Radix UI, Tailwind CSS и собственный Material 3-inspired визуальный слой.
-- Node.js 22.x, npm и Vercel-совместимая production-сборка. Major-версия закреплена, чтобы Vercel не переключал проект на новый Node.js автоматически.
+- Node.js 24.x LTS, npm и Vercel-совместимая production-сборка. Major-версия совпадает с настройкой Vercel; Node.js 26 не используется до появления LTS-статуса и поддержки платформой.
 
 ## Архитектура
 
