@@ -17,7 +17,7 @@ A mobile-first, installable currency converter for fiat and crypto. Currenzy use
 
 ## Development
 
-Requires Node.js 22 or newer.
+Requires Node.js 22.x. The pinned major version matches the Vercel runtime and prevents an automatic major upgrade.
 
 ```bash
 npm install
