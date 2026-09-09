@@ -13,13 +13,11 @@ export function convertAmount(amount: string, from: string, to: string, rates: R
   }
 }
 
-export function formatConverted(value: Big, language: Language) {
+export function formatConverted(value: Big, language: Language, decimalPlaces = 2) {
   const number = Number(value.toString());
-  if (!Number.isFinite(number)) return value.toPrecision(8);
-  const magnitude = Math.abs(number);
-  const maximumFractionDigits = magnitude >= 1_000_000 ? 2 : magnitude >= 1 ? 4 : magnitude >= 0.01 ? 6 : 10;
+  if (!Number.isFinite(number)) return value.toFixed(decimalPlaces);
   return new Intl.NumberFormat(language === "ru" ? "ru-RU" : "en-US", {
-    maximumFractionDigits,
+    maximumFractionDigits: decimalPlaces,
     minimumFractionDigits: 0,
     useGrouping: true,
   }).format(number);

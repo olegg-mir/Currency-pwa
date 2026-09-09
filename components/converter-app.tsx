@@ -163,8 +163,8 @@ export function ConverterApp() {
   const convertedValue = useCallback((code: string) => {
     if (!snapshot) return "—";
     const converted = convertAmount(preferences.amount, preferences.active, code, snapshot.rates);
-    return converted ? formatConverted(converted, preferences.language) : "—";
-  }, [preferences.active, preferences.amount, preferences.language, snapshot]);
+    return converted ? formatConverted(converted, preferences.language, preferences.decimalPlaces) : "—";
+  }, [preferences.active, preferences.amount, preferences.decimalPlaces, preferences.language, snapshot]);
 
   const promoteCurrency = useCallback((code: string) => {
     setPreferences((current) => ({
@@ -315,6 +315,8 @@ export function ConverterApp() {
         onThemeChange={(theme: ThemePreference) => setPreference("theme", theme)}
         offlineMode={preferences.offlineMode}
         onOfflineModeChange={(offline) => setPreference("offlineMode", offline)}
+        decimalPlaces={preferences.decimalPlaces}
+        onDecimalPlacesChange={(decimalPlaces) => setPreference("decimalPlaces", decimalPlaces)}
         t={t}
       />
       <Toaster position="top-center" richColors />

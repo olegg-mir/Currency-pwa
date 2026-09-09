@@ -187,6 +187,13 @@ html[data-theme="dark"] .offline-banner { color: #ffd39c; background: #3c2c1c; }
 .settings-sheet > section:last-of-type:not(.setting-section), .offline-setting { display: flex; }
 .settings-sheet .setting-label span { display: flex; flex-direction: column; gap: 2px; }
 .settings-sheet .setting-label small { color: var(--muted-foreground); font-size: 12px; font-weight: 500; }
+.precision-setting { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.precision-setting .setting-label { margin: 0; }
+.stepper { flex: none; display: grid; grid-template-columns: 40px 42px 40px; align-items: center; padding: 3px; border-radius: 15px; background: var(--surface-2); }
+.stepper button { width: 40px; height: 40px; display: grid; place-items: center; border: 0; border-radius: 12px; color: var(--foreground); background: transparent; cursor: pointer; }
+.stepper button:hover { background: var(--surface); }
+.stepper button:disabled { cursor: default; opacity: .3; }
+.stepper output { font-size: 17px; font-weight: 800; text-align: center; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes currency-change { from { opacity: .72; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }

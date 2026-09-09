@@ -18,3 +18,11 @@ test("formats values for the selected locale", () => {
   assert.equal(formatConverted(converted, "en"), "900");
   assert.equal(formatConverted(converted, "ru").replace(/\s/g, " "), "900");
 });
+
+test("respects the configured number of decimal places", () => {
+  const converted = convertAmount("1", "USD", "EUR", { USD: "1", EUR: "0.87654" });
+  assert.ok(converted);
+  assert.equal(formatConverted(converted, "en"), "0.88");
+  assert.equal(formatConverted(converted, "en", 4), "0.8765");
+  assert.equal(formatConverted(converted, "en", 0), "1");
+});

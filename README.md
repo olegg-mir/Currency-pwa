@@ -11,6 +11,7 @@ A mobile-first, installable currency converter for fiat and crypto. Currenzy use
 - Installable PWA with an offline application shell
 - English and Russian interface
 - System, light and dark themes
+- Configurable result precision (0–10 decimal places)
 - Touch drag-and-drop and keyboard-accessible currency ordering
 - Local flags, common crypto logos and offline-safe monogram fallbacks
 
@@ -41,3 +42,5 @@ The application shell and local icons are precached by Serwist. A validated rate
 ## Data source
 
 Rates and currency metadata come from Coinbase public endpoints. Values are informational reference rates and do not include trading fees or banking spreads. No API key is required.
+
+See [TECHNICAL.md](./TECHNICAL.md) for architecture, data contracts, caching, PWA assets, persistence and deployment details.

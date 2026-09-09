@@ -1,6 +1,6 @@
 "use client";
 
-import { Languages, MoonStar, WifiOff } from "lucide-react";
+import { Languages, Minus, MoonStar, Plus, Sigma, WifiOff } from "lucide-react";
 import type { Language, TranslationKey } from "@/lib/translations";
 import type { ThemePreference } from "@/lib/storage";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -15,11 +15,13 @@ type SettingsSheetProps = {
   onThemeChange: (theme: ThemePreference) => void;
   offlineMode: boolean;
   onOfflineModeChange: (offline: boolean) => void;
+  decimalPlaces: number;
+  onDecimalPlacesChange: (decimalPlaces: number) => void;
   t: (key: TranslationKey) => string;
 };
 
 export function SettingsSheet(props: SettingsSheetProps) {
-  const { open, onOpenChange, language, onLanguageChange, theme, onThemeChange, offlineMode, onOfflineModeChange, t } = props;
+  const { open, onOpenChange, language, onLanguageChange, theme, onThemeChange, offlineMode, onOfflineModeChange, decimalPlaces, onDecimalPlacesChange, t } = props;
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="app-sheet settings-sheet" showCloseButton={false}>
@@ -45,6 +47,15 @@ export function SettingsSheet(props: SettingsSheetProps) {
             {(["en", "ru"] as const).map((option) => (
               <button key={option} className={language === option ? "selected" : ""} onClick={() => onLanguageChange(option)}>{t(option === "en" ? "english" : "russian")}</button>
             ))}
+          </div>
+        </section>
+
+        <section className="setting-section precision-setting">
+          <div className="setting-label"><Sigma size={20} /><span><strong>{t("decimalPlaces")}</strong><small>{t("decimalPlacesDescription")}</small></span></div>
+          <div className="stepper" role="group" aria-label={t("decimalPlaces")}>
+            <button onClick={() => onDecimalPlacesChange(Math.max(0, decimalPlaces - 1))} disabled={decimalPlaces === 0} aria-label={t("decreaseDecimals")}><Minus size={18} /></button>
+            <output aria-live="polite">{decimalPlaces}</output>
+            <button onClick={() => onDecimalPlacesChange(Math.min(10, decimalPlaces + 1))} disabled={decimalPlaces === 10} aria-label={t("increaseDecimals")}><Plus size={18} /></button>
           </div>
         </section>
 

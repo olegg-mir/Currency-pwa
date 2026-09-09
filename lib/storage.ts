@@ -11,6 +11,7 @@ export type Preferences = {
   language: Language;
   theme: ThemePreference;
   offlineMode: boolean;
+  decimalPlaces: number;
 };
 
 export const defaultPreferences: Preferences = {
@@ -20,7 +21,17 @@ export const defaultPreferences: Preferences = {
   language: "en",
   theme: "system",
   offlineMode: false,
+  decimalPlaces: 2,
 };
+
+export function normalizePreferences(value: unknown): Preferences | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const stored = value as Partial<Preferences>;
+  const decimalPlaces = Number.isInteger(stored.decimalPlaces) && Number(stored.decimalPlaces) >= 0 && Number(stored.decimalPlaces) <= 10
+    ? Number(stored.decimalPlaces)
+    : defaultPreferences.decimalPlaces;
+  return { ...defaultPreferences, ...stored, decimalPlaces };
+}
 
 let database: ReturnType<typeof openDB> | undefined;
 
@@ -35,11 +46,11 @@ function getDatabase() {
 
 export async function loadStoredState() {
   const db = await getDatabase();
-  const [preferences, snapshot] = await Promise.all([
-    db.get("app", "preferences") as Promise<Preferences | undefined>,
+  const [storedPreferences, snapshot] = await Promise.all([
+    db.get("app", "preferences") as Promise<unknown>,
     db.get("app", "snapshot") as Promise<RateSnapshot | undefined>,
   ]);
-  return { preferences, snapshot };
+  return { preferences: normalizePreferences(storedPreferences), snapshot };
 }
 
 export async function savePreferences(preferences: Preferences) {
