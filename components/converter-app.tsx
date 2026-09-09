@@ -10,7 +10,7 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { Delete, GripVertical, Plus, RefreshCw, Settings, Trash2, WifiOff } from "lucide-react";
+import { ChevronDown, Delete, GripVertical, Keyboard, Plus, RefreshCw, Settings, Trash2, WifiOff } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
@@ -18,7 +18,7 @@ import { AddCurrencySheet } from "./add-currency-sheet";
 import { CurrencyIcon } from "./currency-icon";
 import { SettingsSheet } from "./settings-sheet";
 import { SortableCurrencyRow } from "./sortable-currency-row";
-import { isSnapshot, isSnapshotStale, shouldRefresh, type CurrencyInfo, type RateSnapshot } from "@/lib/rates";
+import { isSnapshot, shouldRefresh, type CurrencyInfo, type RateSnapshot } from "@/lib/rates";
 import { convertAmount, formatConverted } from "@/lib/conversion";
 import { editAmount } from "@/lib/input";
 import { defaultPreferences, loadStoredState, savePreferences, saveSnapshot, type Preferences, type ThemePreference } from "@/lib/storage";
@@ -45,6 +45,7 @@ export function ConverterApp() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [manage, setManage] = useState(false);
+  const [keypadOpen, setKeypadOpen] = useState(true);
   const [now, setNow] = useState(() => Date.now());
 
   const t = useCallback((key: TranslationKey) => translate(preferences.language, key), [preferences.language]);
@@ -53,14 +54,15 @@ export function ConverterApp() {
     setPreferences((current) => ({ ...current, [key]: value }));
   }, []);
 
-  const downloadRates = useCallback(async (announce = false) => {
+  const downloadRates = useCallback(async (announce = false, force = false) => {
     if (preferences.offlineMode || !navigator.onLine) {
       if (announce) toast.info(preferences.offlineMode ? t("offline") : t("networkOffline"));
       return;
     }
     setUpdateState("loading");
     try {
-      const response = await fetch("/api/rates", { cache: "no-store" });
+      const endpoint = force ? `/api/rates?force=1&at=${Date.now()}` : "/api/rates";
+      const response = await fetch(endpoint, { cache: "no-store" });
       if (!response.ok) throw new Error(`Rates request failed (${response.status})`);
       const nextSnapshot: unknown = await response.json();
       if (!isSnapshot(nextSnapshot)) throw new Error("Invalid rates response");
@@ -164,19 +166,13 @@ export function ConverterApp() {
     return converted ? formatConverted(converted, preferences.language) : "—";
   }, [preferences.active, preferences.amount, preferences.language, snapshot]);
 
-  const animateUpdate = useCallback((update: () => void) => {
-    if (document.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      document.startViewTransition(update);
-    } else update();
-  }, []);
-
   const promoteCurrency = useCallback((code: string) => {
-    animateUpdate(() => setPreferences((current) => ({
+    setPreferences((current) => ({
       ...current,
       active: code,
       secondary: current.secondary.map((item) => item === code ? current.active : item),
-    })));
-  }, [animateUpdate]);
+    }));
+  }, []);
 
   const removeSecondary = useCallback((code: string) => {
     if (preferences.secondary.length < 2) { toast.info(t("minCurrencies")); return; }
@@ -185,12 +181,12 @@ export function ConverterApp() {
 
   const removeActive = useCallback(() => {
     if (preferences.secondary.length < 2) { toast.info(t("minCurrencies")); return; }
-    animateUpdate(() => setPreferences((current) => ({
+    setPreferences((current) => ({
       ...current,
       active: current.secondary[0],
       secondary: current.secondary.slice(1),
-    })));
-  }, [animateUpdate, preferences.secondary.length, t]);
+    }));
+  }, [preferences.secondary.length, t]);
 
   const moveSecondary = useCallback((code: string, direction: -1 | 1) => {
     setPreferences((current) => {
@@ -220,9 +216,11 @@ export function ConverterApp() {
 
   const refresh = useCallback(() => {
     if (preferences.offlineMode || !online) { void downloadRates(true); return; }
-    if (snapshot && !isSnapshotStale(snapshot)) { toast.info(t("ratesCurrent")); return; }
-    void downloadRates(true);
-  }, [downloadRates, online, preferences.offlineMode, snapshot, t]);
+    void downloadRates(true, true);
+  }, [downloadRates, online, preferences.offlineMode]);
+
+  const amountLength = preferences.amount.length;
+  const amountSize = amountLength > 14 ? "xlong" : amountLength > 10 ? "long" : amountLength > 7 ? "medium" : "short";
 
   const statusLabel = useMemo(() => {
     if (preferences.offlineMode || !online) return t("offline");
@@ -240,18 +238,19 @@ export function ConverterApp() {
         <header className="topbar">
           <div><p className="eyebrow">{t("converter")}</p><h1>{t("appName")}</h1></div>
           <div className="top-actions">
+            <button className="icon-button" onClick={() => setAddOpen(true)} aria-label={t("addCurrency")}><Plus size={22} /></button>
             <button className={`icon-button ${updateState === "loading" ? "is-loading" : ""}`} onClick={refresh} aria-label={t("refresh")}><RefreshCw size={20} /></button>
             <button className="icon-button" onClick={() => setSettingsOpen(true)} aria-label={t("settings")}><Settings size={20} /></button>
           </div>
         </header>
 
-        <div className="source-card" style={{ viewTransitionName: `currency-${activeCurrency.code}` }}>
+        <div className="source-card" key={activeCurrency.code}>
           <div className="source-meta">
             <CurrencyIcon key={activeCurrency.code} code={activeCurrency.code} type={activeCurrency.type} size="large" />
             <div><strong>{activeCurrency.code}</strong><span>{activeCurrency.name}</span></div>
             {manage ? <button className="source-remove" onClick={removeActive} aria-label={`${t("delete")}: ${activeCurrency.code}`}><Trash2 size={19} /></button> : null}
           </div>
-          <output className="source-amount" aria-live="polite">{preferences.amount}</output>
+          <output className={`source-amount amount-${amountSize}`} aria-live="polite">{preferences.amount}</output>
           <div className="rate-status">
             {preferences.offlineMode || !online ? <WifiOff size={14} /> : <span className={`status-dot ${updateState === "error" ? "error" : ""}`} />}
             {statusLabel}
@@ -269,7 +268,7 @@ export function ConverterApp() {
           <SortableContext items={preferences.secondary} strategy={verticalListSortingStrategy}>
             <div className="currency-list">
               {secondaryCurrencies.map((currency, index) => (
-                <div key={currency.code} style={{ viewTransitionName: `currency-${currency.code}` }}>
+                <div key={currency.code}>
                   <SortableCurrencyRow
                     currency={currency}
                     value={convertedValue(currency.code)}
@@ -287,16 +286,22 @@ export function ConverterApp() {
           </SortableContext>
         </DndContext>
 
-        <button className="add-button" onClick={() => setAddOpen(true)}><Plus size={20} />{t("addCurrency")}</button>
-
-        <div className="keypad-wrap">
-          <button className="clear-button" onClick={() => handleKey("clear")}>{t("clear")}</button>
-          <div className="keypad" aria-label="Numeric keypad">
-            {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0"].map((key) => (
-              <button key={key} onClick={() => handleKey(key)} aria-label={key === "." ? t("decimal") : key}>{key}</button>
-            ))}
-            <button onClick={() => handleKey("backspace")} aria-label={t("backspace")}><Delete size={23} /></button>
+        <div className={`keypad-wrap ${keypadOpen ? "" : "is-collapsed"}`}>
+          <div className="keypad-toolbar">
+            <button className="keypad-toggle" onClick={() => setKeypadOpen((value) => !value)} aria-expanded={keypadOpen}>
+              {keypadOpen ? <ChevronDown size={18} /> : <Keyboard size={18} />}
+              {keypadOpen ? t("hideKeypad") : t("showKeypad")}
+            </button>
+            {keypadOpen ? <button className="clear-button" onClick={() => handleKey("clear")}>{t("clear")}</button> : null}
           </div>
+          {keypadOpen ? (
+            <div className="keypad" aria-label="Numeric keypad">
+              {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0"].map((key) => (
+                <button key={key} onClick={() => handleKey(key)} aria-label={key === "." ? t("decimal") : key}>{key}</button>
+              ))}
+              <button onClick={() => handleKey("backspace")} aria-label={t("backspace")}><Delete size={23} /></button>
+            </div>
+          ) : null}
         </div>
       </section>
 

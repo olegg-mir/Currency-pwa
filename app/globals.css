@@ -100,13 +100,16 @@ h1 { margin: 0; font-size: 24px; letter-spacing: -.04em; }
 .icon-button:active { transform: scale(.93); }
 .icon-button.is-loading svg { animation: spin 1s linear infinite; }
 
-.source-card { flex: none; margin: 4px 14px 14px; padding: 19px; border-radius: 28px; color: white; background: linear-gradient(145deg, #4038d7, #6759ec 58%, #7b6df2); box-shadow: 0 16px 36px rgb(79 70 229 / 25%); contain: layout; }
+.source-card { flex: none; margin: 4px 14px 14px; padding: 19px; border-radius: 28px; color: white; background: linear-gradient(145deg, #4038d7, #6759ec 58%, #7b6df2); box-shadow: 0 16px 36px rgb(79 70 229 / 25%); contain: layout; animation: currency-change 180ms ease-out; }
 .source-meta { display: flex; align-items: center; gap: 12px; }
 .source-meta > div { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .source-meta strong { font-size: 17px; }
 .source-meta > div > span { overflow: hidden; color: rgb(255 255 255 / 72%); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 .source-remove { width: 42px; height: 42px; display: grid; place-items: center; margin-left: auto; border: 0; border-radius: 50%; color: white; background: rgb(255 255 255 / 15%); }
-.source-amount { display: block; min-height: 70px; padding: 24px 0 16px; overflow: hidden; font-size: clamp(48px, 15vw, 72px); font-weight: 520; line-height: .98; letter-spacing: -.065em; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
+.source-amount { display: block; width: 100%; min-height: 70px; padding: 24px 0 16px; overflow: visible; font-size: clamp(48px, 15vw, 72px); font-weight: 520; line-height: .98; letter-spacing: -.065em; text-align: right; white-space: nowrap; }
+.source-amount.amount-medium { font-size: 52px; }
+.source-amount.amount-long { font-size: 38px; }
+.source-amount.amount-xlong { font-size: 28px; letter-spacing: -.045em; }
 .rate-status { min-height: 20px; display: flex; align-items: center; gap: 7px; font-size: 12px; color: rgb(255 255 255 / 76%); }
 .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #75efb9; box-shadow: 0 0 0 4px rgb(117 239 185 / 14%); }
 .status-dot.error { background: #ffc46d; box-shadow: 0 0 0 4px rgb(255 196 109 / 14%); }
@@ -139,10 +142,10 @@ html[data-theme="dark"] .offline-banner { color: #ffd39c; background: #3c2c1c; }
 .row-management button { width: 34px; height: 38px; display: grid; place-items: center; border: 0; border-radius: 10px; color: var(--muted-foreground); background: transparent; }
 .row-management button:disabled { opacity: .25; }
 .row-management .remove-button { color: var(--destructive); }
-.add-button { flex: none; align-self: center; min-height: 46px; display: flex; align-items: center; gap: 7px; margin: 6px auto 8px; padding: 0 18px; border: 0; border-radius: 999px; color: var(--accent-foreground); background: var(--accent); font-weight: 760; cursor: pointer; }
-
 .keypad-wrap { flex: none; border-top: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 96%, transparent); }
-.clear-button { display: block; min-height: 30px; margin: 3px 17px -4px auto; padding: 0 5px; border: 0; color: var(--muted-foreground); background: transparent; font-size: 12px; font-weight: 700; }
+.keypad-wrap.is-collapsed { min-height: 54px; }
+.keypad-toolbar { min-height: 38px; display: flex; align-items: center; justify-content: space-between; padding: 2px 16px 0; }
+.keypad-toggle, .clear-button { min-height: 34px; display: flex; align-items: center; gap: 6px; padding: 0 5px; border: 0; color: var(--muted-foreground); background: transparent; font-size: 12px; font-weight: 700; cursor: pointer; }
 .keypad { display: grid; grid-template-columns: repeat(3, 1fr); padding: 2px 18px max(10px, env(safe-area-inset-bottom)); }
 .keypad button { height: 49px; display: grid; place-items: center; border: 0; border-radius: 17px; color: inherit; background: transparent; font-size: 21px; cursor: pointer; }
 .keypad button:hover { background: var(--surface-2); }
@@ -186,7 +189,7 @@ html[data-theme="dark"] .offline-banner { color: #ffd39c; background: #3c2c1c; }
 .settings-sheet .setting-label small { color: var(--muted-foreground); font-size: 12px; font-weight: 500; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
-::view-transition-group(*) { animation-duration: 280ms; animation-timing-function: cubic-bezier(.2,.8,.2,1); }
+@keyframes currency-change { from { opacity: .72; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (min-width: 700px) {
   .app-shell { padding: 28px; }
@@ -194,9 +197,32 @@ html[data-theme="dark"] .offline-banner { color: #ffd39c; background: #3c2c1c; }
   .app-sheet { bottom: 24px !important; border-radius: 28px; }
 }
 
+@media (min-width: 900px) {
+  .converter {
+    width: min(1180px, 100%);
+    height: calc(100svh - 56px);
+    max-height: 940px;
+    display: grid;
+    grid-template-columns: minmax(340px, .82fr) minmax(430px, 1.18fr);
+    grid-template-rows: auto auto 1fr auto;
+  }
+  .topbar { grid-column: 1 / -1; grid-row: 1; padding: 22px 26px 18px; border-bottom: 1px solid var(--border); }
+  .source-card { grid-column: 1; grid-row: 2; margin: 24px 24px 16px; }
+  .offline-banner { grid-column: 1; grid-row: 3; align-self: start; margin: 0 24px 16px; }
+  .list-heading { z-index: 1; grid-column: 2; grid-row: 2; align-self: start; padding: 26px 28px 6px; }
+  .currency-list { grid-column: 2; grid-row: 2 / 5; min-height: 0; padding: 72px 18px 24px; border-left: 1px solid var(--border); }
+  .currency-row { min-height: 74px; }
+  .row-value { max-width: 300px; font-size: 25px; }
+  .keypad-wrap { grid-column: 1; grid-row: 4; margin: 0 24px 24px; overflow: hidden; border: 1px solid var(--border); border-radius: 24px; }
+  .keypad button { height: 56px; }
+}
+
 @media (max-height: 720px) {
   .source-card { padding: 16px; margin-bottom: 10px; }
   .source-amount { min-height: 54px; padding: 15px 0 10px; font-size: 48px; }
+  .source-amount.amount-medium { font-size: 43px; }
+  .source-amount.amount-long { font-size: 34px; }
+  .source-amount.amount-xlong { font-size: 27px; }
   .currency-row { min-height: 58px; }
   .currency-avatar { width: 40px; height: 40px; }
   .keypad button { height: 43px; }
@@ -204,5 +230,4 @@ html[data-theme="dark"] .offline-banner { color: #ffd39c; background: #3c2c1c; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-  ::view-transition-group(*) { animation-duration: .01ms; }
 }
