@@ -2,6 +2,8 @@
 
 A mobile-first, installable currency converter for fiat and crypto. Currenzy uses public Coinbase rates, keeps the last successful snapshot on the device, and remains useful when the network is unavailable.
 
+![Currenzy main converter screen](./public/readme-preview.png)
+
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Folegg-mir%2FCurrency-pwa)
 
 ## Features
